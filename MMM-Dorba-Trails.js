@@ -7,8 +7,9 @@
 Module.register("MMM-Dorba-Trails", {
     // Default module config.
     defaults: {
-        url: "https://www.trailforks.com/widgets/region_list/?rids={trailIDs}&cols=title,status,city_title,last_report_ts",
-        trailIDs: "3723,19031,5025",
+        url: "https://www.trailforks.com/widgets/trails_status/?rid={regionId}&displaytype=table&cols=difficulty,title,status,last_report_ts,condition",
+        regionID: "4697",
+		trails: ["devonian-drop","prospector-10615","razors-edge"],
         refInterval: 1000 * 60 * 60 * 6, //once every 6 hours
         basicHeader: false,
         //trail status url
@@ -25,9 +26,6 @@ Module.register("MMM-Dorba-Trails", {
         // Logging appears in Chrome developer tools console
         Log.info("Starting module: " + this.name);
 
-        // this.titles = ["Current Solar Power:", "Daily Energy:", "Last Month:", "Year To Date:", "Lifetime Energy:"];
-        // this.suffixes = ["Watts", "kWh", "kWh", "kWh", "MWh"];
-        // this.results = ["Loading", "Loading", "Loading", "Loading", "Loading"];
         this.loaded = false;
         this.getTrailStatus();
 
@@ -119,16 +117,20 @@ Module.register("MMM-Dorba-Trails", {
             var nameTd = document.createElement("td");
             var statusTd = document.createElement("td");
             var lastCheckTd = document.createElement("td");
+            var conditionTd = document.createElement("td");
 
             nameTd.innerHTML = t.name;
-            statusTd.innerHTML = t.statusOpen ? '<i class="fas fa-check-circle"></i>' : '<i class="far fa-times-circle"></i>';
+			statusTd.innerHTML = t.statusOpen;
             lastCheckTd.innerHTML = t.lastCheck;
+			conditionTd.innerHTML = t.condition
             nameTd.className += " medium regular bright";
             statusTd.className += " medium light normal";
             lastCheckTd.className += " medium light normal";
+            conditionTd.className += " medium light normal";
 
             row.appendChild(nameTd);
             row.appendChild(statusTd);
+            row.appendChild(conditionTd);
             row.appendChild(lastCheckTd);
 
             tb.appendChild(row);

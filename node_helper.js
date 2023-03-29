@@ -22,7 +22,7 @@ module.exports = NodeHelper.create({
 		console.log("TRAILS: Notification: " + notification + " Payload: " + payload);
 
 		if (notification === "GET_TRAIL_STATUS") {
-			var dorbaTrailsUrl = payload.config.url.replace("{trailIDs}", payload.config.trailIDs);
+			var dorbaTrailsUrl = payload.config.url.replace("{regionId}", payload.config.regionID);
 
 			var jsonData = { trails: [], error: "" };
 			
@@ -53,20 +53,44 @@ module.exports = NodeHelper.create({
 			try {
 				console.log("TRAILS: fetching " + url);
 				var body = await request(url);
-				console.log("TRAILS: got body " + body);
+				//console.log("TRAILS: got body " + body);
 			
 				var dom = new JSDOM(body);
 				var rows = dom.window.document.querySelectorAll("tbody tr");
 				rows.forEach(r => {
 					var cols = r.cells;
-					var name = r.cells[0].children[0].innerHTML;
-					var statusOpen = r.cells[1].innerHTML.includes("sgreen");
-					var lastCheck = r.cells[3].querySelectorAll("div div")[0].innerHTML;
-					jsonData.trails.splice(0,0,{
-						name: name,
-						statusOpen: statusOpen,
-						lastCheck: lastCheck
-					});
+					var name = r.cells[1].children[0].innerHTML;
+					//var url = r.cells[1].children[1].innerHTML;
+					var statusOpen;
+					//console.log ("TRAILS: row:" + r.cells[2].innerHTML);
+					if (r.cells[2].innerHTML.includes("sgreen")){
+						statusOpen = '<i class="fas fa-check-circle"></i>';
+					}else if(r.cells[2].innerHTML.includes("sred")){
+						statusOpen = '<i class="far fa-times-circle"></i>';
+					}else {
+						statusOpen = '<i class="fa fa-exclamation-circle"></i>';
+					}
+					var lastCheck = "";
+					if(r.cells[3].querySelectorAll("div div")[0]){
+						lastCheck = r.cells[3].querySelectorAll("div div")[0].innerHTML;
+					}
+					var condition = ""
+					if(r.cells[4].querySelectorAll("span")[1]){
+						condition = r.cells[4].querySelectorAll("span")[1].innerHTML;
+					}
+					
+					for(i = 0; i < payload.config.trails.length; i++){
+						if(r.cells[1].innerHTML.includes(payload.config.trails[i])){
+							jsonData.trails.push({
+								name: name,
+								statusOpen: statusOpen,
+								lastCheck: lastCheck,
+								condition: condition
+							});
+							console.log("TRAILS: status:" + statusOpen);
+							break;
+						}
+					}
 				});
 
 				console.log("TRAILS: send status");
